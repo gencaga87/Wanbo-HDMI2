@@ -12,24 +12,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK
-        run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
       - name: Install Gradle
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip
           unzip -q gradle-8.7-bin.zip
-          echo "$PWD/gradle-8.7/bin" >> $GITHUB_PATH
+          echo "$PWD/gradle-8.7/bin" >> "$GITHUB_PATH"
 
       - name: Extract project
         run: |
