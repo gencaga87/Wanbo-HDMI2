@@ -12,35 +12,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install SDK packages
+      - name: Check Android environment
         run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Install Gradle
-        run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip
-          unzip -q gradle-8.7-bin.zip
-          echo "$PWD/gradle-8.7/bin" >> "$GITHUB_PATH"
+          java -version
+          gradle --version
+          ls -la
 
       - name: Extract project
         run: |
+          rm -rf project
+          mkdir project
           unzip -q Wanbo_HDMI2_Launcher_Project.zip -d project
+          echo "Project contents:"
+          find project -maxdepth 3 -type f | head -100
 
       - name: Build APK
         working-directory: project
-        run: gradle assembleDebug --no-daemon
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon
+          else
+            gradle assembleDebug --no-daemon
+          fi
+
+      - name: Find APK
+        run: |
+          find project -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Wanbo-HDMI2-APK
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: project/**/*.apk
